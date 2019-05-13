@@ -1057,7 +1057,7 @@ void test()
 			Fen.DimmerValue = Fen.T_Set*100;
 			break;
 		case FenFanMod:
-			Fen.htim->Instance->CCR2 = FenFan.P_Set * FenFan.FanStep;
+			FenFan.htim->Instance->CCR2 = FenFan.P_Set * FenFan.FanStep;
 			break;
 		case SpecMod:
 
@@ -1299,30 +1299,29 @@ void SolderControl(SolderTypeDef* solder){
 	}
 }
 
+void Gerkon_Handler(){
+	if ((Station.IE & Gerkon_IE) && Fen.Status  ){
+		Fen.GerkonStatus = HAL_GPIO_ReadPin(Gerkon_Port, Gerkon_Pin);
+		Fen.Status = Fen.GerkonStatus;
+		DimmerControl(&Fen);
+	}
+}
+
 void DimmerControl(ChannelTypeDef* ChStrct)
 {
 	if(ChStrct->Status == On && ChStrct->error == 0)
 	{
-		if(Station.IE & Gerkon_IE){
-			if(ChStrct->GerkonStatus == GPIO_PIN_RESET)
-			{
-				ChStrct->DimerStatus = ON;
-				FanControl(On);
-				HAL_GPIO_WritePin(FenRelePort, FenRelePin, GPIO_PIN_SET);
-				HAL_TIM_OnePulse_Start_IT(&DimmerTim, DimmerTimCh);
+		ChStrct->DimerStatus = ON;
+		FanControl(On);
+		HAL_GPIO_WritePin(FenRelePort, FenRelePin, GPIO_PIN_SET);
+		HAL_TIM_OnePulse_Start_IT(&DimmerTim, DimmerTimCh);
 
-			} else ChStrct->DimerStatus = OFF;
-		}else{
-			ChStrct->DimerStatus = ON;
-			FanControl(On);
-			HAL_GPIO_WritePin(FenRelePort, FenRelePin, GPIO_PIN_SET);
-			HAL_TIM_OnePulse_Start_IT(&DimmerTim, DimmerTimCh);
-		}
 	}
-	else{
-		  //Fen.Status = OFF;
-		  ChStrct->DimerStatus = OFF;
-		  HAL_GPIO_WritePin(FenRelePort, FenRelePin, GPIO_PIN_RESET);
+	else
+	{
+		//Fen.Status = OFF;
+		ChStrct->DimerStatus = OFF;
+		HAL_GPIO_WritePin(FenRelePort, FenRelePin, GPIO_PIN_RESET);
 	}
 }
 
@@ -1396,11 +1395,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				MoweDetect();
 				break;
 			case Gerkon_Pin:
-				if( Fen.Status && (Station.IE & Gerkon_IE)){
-					Fen.GerkonStatus = HAL_GPIO_ReadPin(Gerkon_Port, Gerkon_Pin);
-					DimmerControl(&Fen);
-					MoweDetect();
-				}
+				Gerkon_Handler();
+				MoweDetect();
 				break;
 			case Button1_Pin:
 				Solder.Status = PushButton( SolderMod);
@@ -1414,7 +1410,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				break;
 			case Button3_Pin:
 				FenFan.Status = PushButton(FenFanMod);
-				FanControl(FanSpeedMax);					// peredelat // not off in this place
+				FanControl(FenFan.Status);					// peredelat // not off in this place
 				MoweDetect();
 				break;
 		}
@@ -1422,9 +1418,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	{
 		switch (GPIO_Pin){
 			case RollBall_Pin:
-
+				MoweDetect();
 				break;
-			case ZCD_Pin:		// GPIO_PIN_3://ZCD
+			case ZCD_Pin:
 				ZCD_Handler();
 				break;
 			case EncoderButton_Pin:
@@ -1433,8 +1429,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				MoweDetect();
 				break;
 			case Gerkon_Pin:
-				Fen.GerkonStatus = HAL_GPIO_ReadPin(Gerkon_Port, Gerkon_Pin);
-				//DimmerControl(&Fen);
 				MoweDetect();
 				break;
 			case Button1_Pin:
