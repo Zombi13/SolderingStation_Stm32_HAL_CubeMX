@@ -79,9 +79,9 @@
 
 #define		Gerkon_Port			GPIOA
 #define		Gerkon_Pin			GPIO_PIN_12
-#define		Button1_Pin			GPIO_PIN_15
+#define		Button1_Pin			GPIO_PIN_10
 #define		Button2_Pin			GPIO_PIN_1
-#define		Button3_Pin			GPIO_PIN_10
+#define		Button3_Pin			GPIO_PIN_15
 #define		RollBall_Pin		GPIO_PIN_0
 #define 	Lcd_CS				GPIOB, GPIO_PIN_6
 
@@ -342,7 +342,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  ErrorControl();
+	  //ErrorControl();
 	  SetValue(encoder(&enc0) * Station.Step);
 	  if(enc0.Difference != 0)
 		  MoweDetect();
@@ -365,7 +365,7 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /**Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks 
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14
                               |RCC_OSCILLATORTYPE_LSI;
@@ -379,7 +379,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /**Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks 
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
@@ -416,7 +416,7 @@ static void MX_ADC_Init(void)
   /* USER CODE BEGIN ADC_Init 1 */
 
   /* USER CODE END ADC_Init 1 */
-  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
   */
   hadc.Instance = ADC1;
   hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
@@ -436,7 +436,7 @@ static void MX_ADC_Init(void)
   {
     Error_Handler();
   }
-  /**Configure for the selected ADC regular channel to be converted. 
+  /** Configure for the selected ADC regular channel to be converted. 
   */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
@@ -445,14 +445,14 @@ static void MX_ADC_Init(void)
   {
     Error_Handler();
   }
-  /**Configure for the selected ADC regular channel to be converted. 
+  /** Configure for the selected ADC regular channel to be converted. 
   */
   sConfig.Channel = ADC_CHANNEL_9;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /**Configure for the selected ADC regular channel to be converted. 
+  /** Configure for the selected ADC regular channel to be converted. 
   */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
@@ -483,7 +483,7 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
-  /**Initialize RTC Only 
+  /** Initialize RTC Only 
   */
   hrtc.Instance = RTC;
   hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
@@ -501,7 +501,7 @@ static void MX_RTC_Init(void)
     
   /* USER CODE END Check_RTC_BKUP */
 
-  /**Initialize RTC and set the Time and Date 
+  /** Initialize RTC and set the Time and Date 
   */
   sTime.Hours = 0x0;
   sTime.Minutes = 0x0;
@@ -775,12 +775,18 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PA0 PA1 PA3 PA5 
-                           PA10 PA11 PA12 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_5 
-                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_15;
+  /*Configure GPIO pins : PA0 PA3 PA5 PA11 
+                           PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_11 
+                          |GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA1 PA10 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_10|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA2 */
@@ -1071,17 +1077,17 @@ void SetValue(uint16_t Value){
 		case SolderMod:
 			Solder.T_Set += Value;
 			if(Solder.T_Set <= Solder.T_Min) Solder.T_Set = Solder.T_Min;
-			//if(Solder.T_Set => Solder.T_Max) Solder.T_Set = Solder.T_Max;
+			if(Solder.T_Set >= Solder.T_Max) Solder.T_Set = Solder.T_Max;
 			break;
 		case FenMod:
 			Fen.T_Set += Value;
 			if(Fen.T_Set <= Fen.T_Min) Fen.T_Set = Fen.T_Min;
-			//if(Fen.T_Set >= Fen.T_Max) Fen.T_Set = Fen.T_Max;
+			if(Fen.T_Set >= Fen.T_Max) Fen.T_Set = Fen.T_Max;
 			break;
 		case FenFanMod:
 			FenFan.P_Set += Value;
 			if(FenFan.P_Set <= FenFan.P_Min) FenFan.P_Set = FenFan.P_Min;
-			//if(FenFan.P_Set >= FenFan.P_Max) FenFan.P_Set = FenFan.P_Max;
+			if(FenFan.P_Set >= FenFan.P_Max) FenFan.P_Set = FenFan.P_Max;
 			break;
 		case SpecMod:
 			SMtemp += Value;
@@ -1234,12 +1240,14 @@ uint8_t PushButton(uint8_t workMod){
 	}else{
 		HAL_RTC_GetTime(&hrtc, &Point[1].sTime, RTC_FORMAT_BCD);
 		HAL_RTC_GetDate(&hrtc, &Point[1].sDate, RTC_FORMAT_BCD);
-		CountForButton = 0;
 		if (TimePointCompare(&Point[0], &Point[1]) < 10){
+			CountForButton = 0;
 			return Off;
 		} else {
-			return On;
 			Station.WorkMod = workMod;
+			HAL_RTC_GetTime(&hrtc, &Point[0].sTime, RTC_FORMAT_BCD);
+			HAL_RTC_GetDate(&hrtc, &Point[0].sDate, RTC_FORMAT_BCD);
+			return On;
 		}
 	}
 }
@@ -1399,7 +1407,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				MoweDetect();
 				break;
 			case Button1_Pin:
-				Solder.Status = PushButton( SolderMod);
+				Solder.Status = PushButton(SolderMod);
 				SolderControl(&Solder);
 				MoweDetect();
 				break;

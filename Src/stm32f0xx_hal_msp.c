@@ -1,4 +1,4 @@
- /* USER CODE BEGIN Header */
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : stm32f0xx_hal_msp.c
@@ -108,7 +108,6 @@ void HAL_MspInit(void)
 */
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(hadc->Instance==ADC1)
   {
@@ -158,10 +157,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 * @param hadc: ADC handle pointer
 * @retval None
 */
-
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 {
-
   if(hadc->Instance==ADC1)
   {
   /* USER CODE BEGIN ADC1_MspDeInit 0 */
@@ -193,7 +190,6 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 */
 void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
 {
-
   if(hrtc->Instance==RTC)
   {
   /* USER CODE BEGIN RTC_MspInit 0 */
@@ -214,10 +210,8 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
 * @param hrtc: RTC handle pointer
 * @retval None
 */
-
 void HAL_RTC_MspDeInit(RTC_HandleTypeDef* hrtc)
 {
-
   if(hrtc->Instance==RTC)
   {
   /* USER CODE BEGIN RTC_MspDeInit 0 */
@@ -240,7 +234,6 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef* hrtc)
 */
 void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(hspi->Instance==SPI1)
   {
@@ -276,10 +269,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 * @param hspi: SPI handle pointer
 * @retval None
 */
-
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 {
-
   if(hspi->Instance==SPI1)
   {
   /* USER CODE BEGIN SPI1_MspDeInit 0 */
@@ -310,7 +301,6 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 */
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
 {
-
   if(htim_pwm->Instance==TIM1)
   {
   /* USER CODE BEGIN TIM1_MspInit 0 */
@@ -336,7 +326,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
 */
 void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim_encoder)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(htim_encoder->Instance==TIM3)
   {
@@ -373,7 +362,6 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim_encoder)
 */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
-
   if(htim_base->Instance==TIM14)
   {
   /* USER CODE BEGIN TIM14_MspInit 0 */
@@ -393,7 +381,6 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(htim->Instance==TIM1)
   {
@@ -445,10 +432,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 * @param htim_pwm: TIM_PWM handle pointer
 * @retval None
 */
-
 void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 {
-
   if(htim_pwm->Instance==TIM1)
   {
   /* USER CODE BEGIN TIM1_MspDeInit 0 */
@@ -472,10 +457,8 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 * @param htim_encoder: TIM_Encoder handle pointer
 * @retval None
 */
-
 void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* htim_encoder)
 {
-
   if(htim_encoder->Instance==TIM3)
   {
   /* USER CODE BEGIN TIM3_MspDeInit 0 */
@@ -503,10 +486,8 @@ void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* htim_encoder)
 * @param htim_base: TIM_Base handle pointer
 * @retval None
 */
-
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
-
   if(htim_base->Instance==TIM14)
   {
   /* USER CODE BEGIN TIM14_MspDeInit 0 */
