@@ -150,6 +150,7 @@ struct {
 	uint8_t		Step;
 	uint8_t		MoveDetect;
 	ThermocoupleCalibrationTypeDef	*ThermocoupleProfile;
+	int32_t 	CPUtemperature;
 }Station;
 
 uint8_t	Profile;
@@ -206,7 +207,7 @@ FanTypeDef 		FenFan;
 
 struct
 {
-	uint16_t		buffer[30];
+	uint32_t		buffer[30];
 	uint8_t			bufferCaunt;
 	float			step;
 	uint16_t		Sfen;
@@ -279,6 +280,7 @@ void Srednie();
 void displaiInit();
 void MoweDetect();
 void InactivityDetect ();
+void adc_to_t();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -349,7 +351,9 @@ int main(void)
 	  InactivityDetect ();
 
 	  if(Station.WorkMod != SpecMod) test();
+	  adc_to_t();
 	  displaiInit();
+
 
   }
   /* USER CODE END 3 */
@@ -1046,7 +1050,7 @@ void StationConfig ()
 
 	FenFan.FanStep = FenFanPWM_T.Init.Period/100;
 
-	ADCData.step = 3.3/4095;
+	ADCData.step = (float)3300/4095;
 
 
 
@@ -1072,12 +1076,36 @@ void test()
 	}
 }
 
+void adc_to_t(){
+	Solder.T_Measured = ADCData.buffer[ADCData.bufferCaunt];// * ADCData.step*100;
+	Fen.T_Measured = ADCData.buffer[ADCData.bufferCaunt+1];// * ADCData.step*100;
+
+#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
+//#define VDD_CALIB ((uint32_t) (4095))
+//#define VDD_APPLI ((uint32_t) (3300))
+//#define AVG_SLOPE ((uint32_t) (5336)) //AVG_SLOPE in ADC conversion step
+//(@3.3V)/°C multiplied by 1000 for precision on the division
+//int32_t temperature; /* will contain the temperature in degrees Celsius */
+
+ // AVG_SLOPE= 4.3mV/C
+ // V30= 1.43V
+//Station.CPUtemperature = ((uint32_t) *TEMP30_CAL_ADDR
+//- ((uint32_t) ADCData.buffer[ADCData.bufferCaunt+2] * VDD_APPLI / VDD_CALIB)) * 1000;
+
+//Station.CPUtemperature = ((uint32_t) *TEMP30_CAL_ADDR - ADCData.buffer[ADCData.bufferCaunt+2]*ADCData.step);
+//Station.CPUtemperature = (Station.CPUtemperature / AVG_SLOPE) + 30;
+	Station.CPUtemperature = (1325 - ADCData.buffer[ADCData.bufferCaunt+2]*ADCData.step)*1000;
+	Station.CPUtemperature = (Station.CPUtemperature /4200) + 30;
+///
+
+}
+
 void SetValue(uint16_t Value){
 	switch(Station.WorkMod){
 		case SolderMod:
-			Solder.T_Set += Value;
+			Solder.T_Set += Value*100;
 			if(Solder.T_Set <= Solder.T_Min) Solder.T_Set = Solder.T_Min;
-			if(Solder.T_Set >= Solder.T_Max) Solder.T_Set = Solder.T_Max;
+			//if(Solder.T_Set >= Solder.T_Max) Solder.T_Set = Solder.T_Max;
 			break;
 		case FenMod:
 			Fen.T_Set += Value;
@@ -1464,7 +1492,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 //		  if(i>=256) i =0;
 //		  tempArr[i]= adc_value[1];
 //		  i++;
-		  ADCData.bufferCaunt +=3;
+		  //ADCData.bufferCaunt +=3;
 		  if (ADCData.bufferCaunt >= 30) ADCData.bufferCaunt = 0;
 		  HAL_ADC_Start_DMA(&hadc, (uint32_t*)&ADCData.buffer[ADCData.bufferCaunt], 3);
 //		  HAL_ADC_Start(&hadc);
