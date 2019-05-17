@@ -16,7 +16,13 @@ uint16_t encoder(EncoderTypeDef *encoder){
     	  encoder->Difference =-2;
       if(encoder->Difference == -(encoder->htim->Init.Period) )
     	  encoder->Difference = 2;
+      if(encoder->Difference >10)               //processing, cyclic shift of the timer
+    	  encoder->Difference =0;
+      if(encoder->Difference <-10 )
+    	  encoder->Difference = 0;
+
     }else encoder->Difference = 0;
+
     return encoder->Difference;
 }
 

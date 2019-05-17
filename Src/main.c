@@ -263,7 +263,7 @@ static void MX_TIM14_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
-void SetValue(uint16_t T);
+void SetValue(int16_t T);
 void PID_Fen();
 void PID_Solder();
 void DimmerControl(ChannelTypeDef* ChStrct);
@@ -1024,31 +1024,32 @@ void displaiInit (){
 
 void StationConfig ()
 {
-	Station.IE &= ~(RollBall_IE + Gerkon_IE);
-	Station.Step = 1;
-	enc0.htim = &htim3;
+	Station.IE 			&= ~(RollBall_IE + Gerkon_IE);
+	Station.Step 		= 1;
+	enc0.htim 			= &htim3;
+	enc0.HoldButtonTime = 60;
 
-	Solder.htim 	= &htim1;
-	Solder.Channel 	= TIM_CHANNEL_1;
-	Solder.MaxPower = 95;
-	Solder.T_Min	= 0;
-	Solder.T_Max	= 450;
-
-
-	Fen.htim 		= &htim14;
-	Fen.Channel 	= TIM_CHANNEL_1;
-	Fen.MaxPower 	= 30;
-	Fen.T_Min		= 0;
-	Fen.T_Max		= 450;
-	Fen.T_FanOff	= 50;
+	Solder.htim 		= &htim1;
+	Solder.Channel 		= TIM_CHANNEL_1;
+	Solder.MaxPower 	= 95;
+	Solder.T_Min		= 0;
+	Solder.T_Max		= 450;
 
 
-	FenFan.htim 	= &htim1;
-	FenFan.Channel 	= TIM_CHANNEL_2;
-	FenFan.P_Min	= 25;
-	FenFan.P_Max	= 100;
+	Fen.htim 			= &htim14;
+	Fen.Channel 		= TIM_CHANNEL_1;
+	Fen.MaxPower 		= 30;
+	Fen.T_Min			= 0;
+	Fen.T_Max			= 450;
+	Fen.T_FanOff		= 50;
 
-	FenFan.FanStep = FenFanPWM_T.Init.Period/100;
+
+	FenFan.htim 		= &htim1;
+	FenFan.Channel 		= TIM_CHANNEL_2;
+	FenFan.P_Min		= 25;
+	FenFan.P_Max		= 100;
+
+	FenFan.FanStep 		= FenFanPWM_T.Init.Period/100;
 
 	ADCData.step = (float)3300/4095;
 
@@ -1077,10 +1078,10 @@ void test()
 }
 
 void adc_to_t(){
-	Solder.T_Measured = ADCData.buffer[ADCData.bufferCaunt];// * ADCData.step*100;
-	Fen.T_Measured = ADCData.buffer[ADCData.bufferCaunt+1];// * ADCData.step*100;
+	Solder.T_Measured = ADCData.buffer[ADCData.bufferCaunt] * ADCData.step;
+	Fen.T_Measured = ADCData.buffer[ADCData.bufferCaunt+1] * ADCData.step;
 
-#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
+//#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
 //#define VDD_CALIB ((uint32_t) (4095))
 //#define VDD_APPLI ((uint32_t) (3300))
 //#define AVG_SLOPE ((uint32_t) (5336)) //AVG_SLOPE in ADC conversion step
@@ -1100,7 +1101,7 @@ void adc_to_t(){
 
 }
 
-void SetValue(uint16_t Value){
+void SetValue(int16_t Value){
 	switch(Station.WorkMod){
 		case SolderMod:
 			Solder.T_Set += Value*100;
@@ -1122,6 +1123,7 @@ void SetValue(uint16_t Value){
 			break;
 	}
 }
+
 struct
 {
 	uint8_t		step;
