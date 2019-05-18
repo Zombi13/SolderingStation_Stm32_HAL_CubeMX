@@ -210,9 +210,9 @@ struct
 	uint32_t		buffer[30];
 	uint8_t			bufferCaunt;
 	float			step;
-	uint16_t		Sfen;
-	uint16_t		Ssolder;
-	uint16_t		Ssensor;
+	uint32_t		Sfen;
+	uint32_t		Ssolder;
+	uint32_t		Ssensor;
 
 }ADCData;
 
@@ -1065,7 +1065,7 @@ void test()
 			Solder.htim->Instance->CCR3 =Solder.T_Set +(Solder.htim->Init.Period - Solder.T_Set)/2;
 			break;
 		case FenMod:
-			Fen.DimmerValue = Fen.T_Set*100;
+			Fen.DimmerValue = Fen.T_Set;
 			break;
 		case FenFanMod:
 			FenFan.htim->Instance->CCR2 = FenFan.P_Set * FenFan.FanStep;
@@ -1078,8 +1078,9 @@ void test()
 }
 
 void adc_to_t(){
-	Solder.T_Measured = ADCData.buffer[ADCData.bufferCaunt] * ADCData.step;
-	Fen.T_Measured = ADCData.buffer[ADCData.bufferCaunt+1] * ADCData.step;
+	Srednie();
+	Solder.T_Measured = ADCData.Ssolder * ADCData.step;
+	Fen.T_Measured = ADCData.Sfen * ADCData.step;
 
 //#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
 //#define VDD_CALIB ((uint32_t) (4095))
@@ -1109,9 +1110,9 @@ void SetValue(int16_t Value){
 			//if(Solder.T_Set >= Solder.T_Max) Solder.T_Set = Solder.T_Max;
 			break;
 		case FenMod:
-			Fen.T_Set += Value;
+			Fen.T_Set += Value*100;
 			if(Fen.T_Set <= Fen.T_Min) Fen.T_Set = Fen.T_Min;
-			if(Fen.T_Set >= Fen.T_Max) Fen.T_Set = Fen.T_Max;
+			//if(Fen.T_Set >= Fen.T_Max) Fen.T_Set = Fen.T_Max;
 			break;
 		case FenFanMod:
 			FenFan.P_Set += Value;
@@ -1216,14 +1217,18 @@ uint16_t temp01(){
 }
 
 void Srednie(){
-	for (int i=0; i > sizeof(ADCData.buffer); i+=3){
-		ADCData.Sfen 	= ADCData.buffer[i];
-		ADCData.Ssolder = ADCData.buffer[i+1];
-		ADCData.Ssensor = ADCData.buffer[i+2];
+	ADCData.Ssolder = ADCData.buffer[0];
+	ADCData.Sfen 	= ADCData.buffer[1];
+	ADCData.Ssensor = ADCData.buffer[2];
+
+	for (int i=3; i < sizeof(ADCData.buffer)/4; i+=3){
+		ADCData.Ssolder += ADCData.buffer[i];
+		ADCData.Sfen 	+= ADCData.buffer[i+1];
+		ADCData.Ssensor += ADCData.buffer[i+2];
 	}
-	ADCData.Sfen 	/= sizeof(ADCData.buffer)/3;
-	ADCData.Ssolder /= sizeof(ADCData.buffer)/3;
-	ADCData.Ssensor /= sizeof(ADCData.buffer)/3;
+	ADCData.Sfen 	/= sizeof(ADCData.buffer)/4/3;
+	ADCData.Ssolder /= sizeof(ADCData.buffer)/4/3;
+	ADCData.Ssensor /= sizeof(ADCData.buffer)/4/3;
 }
 
 void MoweDetect(){
@@ -1494,7 +1499,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 //		  if(i>=256) i =0;
 //		  tempArr[i]= adc_value[1];
 //		  i++;
-		  //ADCData.bufferCaunt +=3;
+		  ADCData.bufferCaunt +=3;
 		  if (ADCData.bufferCaunt >= 30) ADCData.bufferCaunt = 0;
 		  HAL_ADC_Start_DMA(&hadc, (uint32_t*)&ADCData.buffer[ADCData.bufferCaunt], 3);
 //		  HAL_ADC_Start(&hadc);
